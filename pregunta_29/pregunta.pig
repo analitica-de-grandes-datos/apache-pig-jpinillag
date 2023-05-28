@@ -33,4 +33,9 @@ $ pig -x local -f pregunta.pig
 
         >>> Escriba su respuesta a partir de este punto <<<
 */
+data = LOAD 'data.csv' using PigStorage(',') AS (id:INT, nombre:chararray, apellido:chararray,fecha:chararray,color:chararray,numero:INT);
 
+todate_data = FOREACH data GENERATE fecha,ToDate(fecha,'yyyy-MM-dd');
+respuesta = FOREACH todate_data GENERATE $0 ,CASE LOWER(ToString($1, 'MMM')) WHEN 'jan' THEN 'ene' WHEN 'apr' THEN 'abr' WHEN 'aug' THEN 'ago' WHEN 'dec' THEN 'dic' ELSE LOWER(ToString($1, 'MMM')) END,SUBSTRING ($0, 5, 7), GetMonth($1);
+
+STORE respuesta INTO 'output' using PigStorage(',');
